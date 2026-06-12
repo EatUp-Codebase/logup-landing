@@ -106,8 +106,9 @@ a { color: var(--color-primary); text-decoration: none; }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  max-width: 1320px;
   height: 72px;
-  gap: 24px;
+  gap: 20px;
 }
 .brand {
   display: flex;
@@ -126,14 +127,46 @@ a { color: var(--color-primary); text-decoration: none; }
   width: 150px;
   height: 44px;
 }
-.main-nav { display: flex; align-items: center; gap: 26px; }
+.main-nav {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 1.35vw, 26px);
+  min-width: 0;
+}
 .main-nav a {
   color: var(--color-text-muted);
   font-size: 0.9rem;
   font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
   transition: color 0.2s ease;
 }
 .main-nav a:hover { color: var(--color-text); }
+.language-switch {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.88);
+}
+.language-switch button {
+  min-width: 32px;
+  padding: 5px 7px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font: 500 0.66rem var(--font-mono);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.language-switch button.active {
+  background: var(--color-primary);
+  color: var(--color-bg);
+}
 .btn {
   display: inline-flex;
   align-items: center;
@@ -159,6 +192,7 @@ a { color: var(--color-primary); text-decoration: none; }
 }
 .btn-outline:hover { border-color: var(--color-primary); color: var(--color-text); }
 .btn-sm { padding: 9px 16px; font-size: 0.85rem; }
+.header-cta { flex-shrink: 0; white-space: nowrap; }
 .btn-lg { padding: 16px 36px; font-size: 1.05rem; border-radius: 8px; }
 
 .nav-toggle {
@@ -1127,6 +1161,16 @@ a { color: var(--color-primary); text-decoration: none; }
 }
 
 /* ============ RESPONSIVE ============ */
+@media (max-width: 1180px) {
+  .header-inner { gap: 14px; }
+  .brand-logo { width: 146px; height: 43px; }
+  .main-nav { gap: 13px; }
+  .main-nav a { font-size: 0.82rem; }
+  .header-cta { padding-inline: 12px; font-size: 0.78rem; }
+}
+@media (max-width: 1100px) {
+  .header-cta { display: none; }
+}
 @media (max-width: 1024px) {
   .evolution-grid { grid-template-columns: 1fr; }
   .evolution-arrow { padding: 10px 0; transform: rotate(90deg); }
@@ -1168,6 +1212,8 @@ a { color: var(--color-primary); text-decoration: none; }
   .nav-toggle { display: grid; place-items: center; }
   .header-cta { display: none; }
   .brand-logo { width: 145px; height: 43px; }
+  .header-inner { gap: 12px; }
+  .language-switch { margin-left: auto; }
   .section-liveops { padding: 72px 0; }
   .liveops-main {
     grid-template-columns: 1fr;
@@ -1194,6 +1240,8 @@ a { color: var(--color-primary); text-decoration: none; }
   .alerts-list { grid-template-columns: 1fr; }
   .alert-card:nth-child(n + 2) { display: none; }
   .vehicle-chip { min-width: 148px; }
+  .brand-logo { width: 132px; height: 40px; }
+  .language-switch button { min-width: 29px; padding-inline: 5px; }
 }
 </style>
 </head>
@@ -1214,6 +1262,10 @@ a { color: var(--color-primary); text-decoration: none; }
       <a href="#equipe">Equipe</a>
       <a href="#contato">Contato</a>
     </nav>
+    <div class="language-switch" role="group" aria-label="Selecionar idioma">
+      <button type="button" data-lang="pt" class="active" aria-pressed="true">PT</button>
+      <button type="button" data-lang="en" aria-pressed="false">EN</button>
+    </div>
     <a href="#contato" class="btn btn-accent btn-sm header-cta">Candidatura Singapura</a>
     <button class="nav-toggle" id="navToggle" aria-label="Abrir menu de navegação" aria-expanded="false" aria-controls="mainNav">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1766,6 +1818,260 @@ a { color: var(--color-primary); text-decoration: none; }
 </footer>
 
 <script>
+// Internacionalização PT/EN sem recarregar a página
+const EN_TRANSLATIONS = {
+  'Solução': 'Solution',
+  'Como Funciona': 'How It Works',
+  'Tecnologia': 'Technology',
+  'Equipe': 'Team',
+  'Contato': 'Contact',
+  'Candidatura Singapura': 'Singapore Application',
+  'Selecionar idioma': 'Select language',
+  'Navegação principal': 'Main navigation',
+  'Navegação do rodapé': 'Footer navigation',
+  'Abrir menu de navegação': 'Open navigation menu',
+  'Fechar menu de navegação': 'Close navigation menu',
+  'LogUp Mobility Intelligence — início': 'LogUp Mobility Intelligence — home',
+  'LogUp Mobility Intelligence — voltar ao topo': 'LogUp Mobility Intelligence — back to top',
+  'Mapa da frota LogUp Mobility Intelligence em movimento por São Luís, Maranhão': 'Map of the LogUp Mobility Intelligence fleet moving across São Luís, Maranhão',
+  'Alertas operacionais em tempo real': 'Real-time operational alerts',
+  'Telemetria da frota': 'Fleet telemetry',
+  'Rastreamento é o passado.': 'Tracking is the past.',
+  'Inteligência operacional é agora.': 'Operational intelligence is now.',
+  'A LogUp Mob. Int. transforma dados de frota em decisões em tempo real — telemetria inteligente, mapas vivos e prevenção de riscos para transportadoras brasileiras.': 'LogUp Mob. Int. turns fleet data into real-time decisions — intelligent telemetry, live maps and risk prevention for Brazilian carriers.',
+  'Conheça a Plataforma ↓': 'Explore the Platform ↓',
+  'Ver Roadmap Técnico': 'View Technical Roadmap',
+  'Modelo de receita recorrente por veículo': 'Recurring revenue model per vehicle',
+  'Telemetria e mapas operacionais ao vivo': 'Live operational telemetry and maps',
+  'Adaptado para regiões com sinal instável': 'Built for regions with unstable connectivity',
+  '// O problema': '// The problem',
+  'O setor logístico brasileiro ainda opera no escuro': 'Brazilian logistics still operates in the dark',
+  'O mercado atual': 'The current market',
+  'Transportadoras brasileiras, especialmente no Norte e Nordeste, ainda dependem de sistemas legados com GPS básico, baixa integração operacional e interfaces desatualizadas. Dados existem, mas não viram inteligência.': 'Brazilian carriers, especially in the North and Northeast, still rely on legacy systems with basic GPS, limited operational integration and outdated interfaces. Data exists, but it does not become intelligence.',
+  'O custo real': 'The real cost',
+  'Frenagens bruscas não detectadas. Rotas ineficientes repetidas. Acidentes que poderiam ser prevenidos. Cada operação sem telemetria inteligente é uma decisão tomada no escuro.': 'Undetected harsh braking. Repeated inefficient routes. Preventable accidents. Every operation without intelligent telemetry is a decision made in the dark.',
+  '"Sistemas legados dominam a logística brasileira. A LogUp Mob. Int. constrói, fase a fase, a alternativa inteligente — começando pelo Maranhão, preparada para o Brasil."': '"Legacy systems dominate Brazilian logistics. LogUp Mob. Int. is building the intelligent alternative, one phase at a time — starting in Maranhão and ready for Brazil."',
+  '// A solução': '// The solution',
+  'Uma plataforma. Inteligência crescente.': 'One platform. Growing intelligence.',
+  'Não são produtos paralelos — é uma evolução linear: cada camada amplia a inteligência da anterior.': 'These are not separate products — they form a linear evolution in which every layer expands the intelligence of the previous one.',
+  'MVP Operacional em Construção': 'Operational MVP in Development',
+  '// EM DESENVOLVIMENTO': '// IN DEVELOPMENT',
+  'Núcleo do MVP — Rastreamento Inteligente': 'MVP Core — Intelligent Tracking',
+  'Mapa operacional em tempo real': 'Real-time operational map',
+  'Cadastro de veículos e operadores': 'Vehicle and operator management',
+  'Dashboard operacional': 'Operational dashboard',
+  'Histórico de rotas': 'Route history',
+  'Alertas básicos': 'Basic alerts',
+  '// PRÓXIMA CAMADA': '// NEXT LAYER',
+  'Score comportamental do motorista': 'Driver behavior score',
+  'Detecção de frenagens bruscas, excesso de velocidade': 'Harsh braking and speeding detection',
+  'Replay de rotas': 'Route replay',
+  'Painel LiveOps com heatmaps': 'LiveOps dashboard with heatmaps',
+  'Alertas inteligentes de risco operacional': 'Intelligent operational risk alerts',
+  'Horizonte — IA + Multimodalidade': 'Horizon — AI + Multimodality',
+  'IA preditiva de acidentes e atrasos': 'Predictive AI for accidents and delays',
+  'Integração IoT e sensores embarcados': 'IoT and embedded sensor integration',
+  'Roteamento inteligente': 'Intelligent routing',
+  'Integração futura com drones logísticos': 'Future logistics drone integration',
+  '// Mercado-alvo': '// Target market',
+  'Construída para onde o Brasil realmente opera': 'Built for where Brazil actually operates',
+  'Pequenas e médias transportadoras': 'Small and medium-sized carriers',
+  'Frotas de 5 a 200 veículos que precisam de controle operacional sem pagar por sistemas enterprise.': 'Fleets of 5 to 200 vehicles that need operational control without enterprise-system costs.',
+  'Logística regional — Norte e Nordeste': 'Regional logistics — North and Northeast',
+  'Regiões com infraestrutura limitada, sinal instável e longas distâncias. A LogUp Mob. Int. opera offline-first e adapta o roteamento à realidade local.': 'Regions with limited infrastructure, unstable connectivity and long distances. LogUp Mob. Int. works offline-first and adapts routing to local conditions.',
+  'Delivery e frotas leves urbanas': 'Delivery and light urban fleets',
+  'Operações de last-mile que precisam de telemetria e rastreamento sem complexidade de grandes ERPs.': 'Last-mile operations that need telemetry and tracking without the complexity of large ERPs.',
+  'SaaS — Assinatura mensal por veículo monitorado': 'SaaS — Monthly subscription per monitored vehicle',
+  'Menor barreira de entrada · Receita recorrente · Escalabilidade gradual': 'Lower entry barrier · Recurring revenue · Gradual scalability',
+  '// Como funciona': '// How it works',
+  'Do dado à decisão': 'From data to decision',
+  'Cada posição capturada em campo percorre um pipeline de inteligência até virar ação preventiva.': 'Every field position travels through an intelligence pipeline until it becomes preventive action.',
+  'campo': 'field',
+  'Veículo em campo': 'Vehicle in the field',
+  'A operação acontece — frota, entregadores, cargas em movimento.': 'The operation unfolds — fleets, drivers and cargo in motion.',
+  'coleta': 'collection',
+  'GPS + Telemetria coletada': 'GPS + Telemetry collected',
+  'Posição, velocidade e comportamento capturados continuamente.': 'Position, speed and behavior captured continuously.',
+  'processamento': 'processing',
+  'Backend processa em tempo real': 'Backend processes in real time',
+  'Normalização e enriquecimento dos dados operacionais.': 'Operational data normalization and enrichment.',
+  'análise · realtime': 'analysis · realtime',
+  'Motor de análise comportamental': 'Behavior analysis engine',
+  'Interpretação contínua de padrões e anomalias.': 'Continuous interpretation of patterns and anomalies.',
+  'alertas': 'alerts',
+  'Alertas inteligentes gerados': 'Intelligent alerts generated',
+  'Riscos e desvios viram notificações acionáveis.': 'Risks and deviations become actionable notifications.',
+  'Painel LiveOps — operador toma decisão': 'LiveOps dashboard — operator takes action',
+  'Visão completa da operação em tempo real.': 'A complete real-time view of the operation.',
+  'prevenção': 'prevention',
+  'Notificação preventiva ao operador': 'Preventive notification to the operator',
+  'A ação chega a quem está em campo antes do incidente.': 'The action reaches field teams before an incident occurs.',
+  'Sistemas tradicionais vs. LogUp Mob. Int.': 'Traditional systems vs. LogUp Mob. Int.',
+  'Sistemas Tradicionais': 'Traditional Systems',
+  'GPS básico': 'Basic GPS',
+  'Rastreamento reativo': 'Reactive tracking',
+  'Interface ultrapassada': 'Outdated interface',
+  'Dados isolados': 'Siloed data',
+  'Sem IA': 'No AI',
+  'Telemetria operacional completa': 'Complete operational telemetry',
+  'Prevenção ativa de riscos': 'Active risk prevention',
+  'LiveOps Center moderno': 'Modern LiveOps Center',
+  'Analytics comportamental integrado': 'Integrated behavioral analytics',
+  'Preparado para IA operacional': 'Ready for operational AI',
+  '// Veja a plataforma ao vivo': '// See the platform live',
+  'A operação inteira, em movimento.': 'The entire operation, in motion.',
+  'Uma simulação do LiveOps da LogUp Mobility Intelligence monitorando veículos e uma entrega por drone em São Luís, em tempo real.': 'A LogUp Mobility Intelligence LiveOps simulation monitoring vehicles and a drone delivery across São Luís in real time.',
+  'Centro de Operações': 'Operations Center',
+  'AO VIVO': 'LIVE',
+  'SÃO LUÍS · MA / 5 VEÍCULOS + 1 DRONE': 'SÃO LUÍS · MA / 5 VEHICLES + 1 DRONE',
+  'PAINEL DE ALERTAS': 'ALERT PANEL',
+  'Demonstração simulada · Nenhum dado operacional real é exibido': 'Simulated demonstration · No real operational data is displayed',
+  '// Tecnologia': '// Technology',
+  'Construído para durar e escalar': 'Built to last and scale',
+  'Inspirado em Samsara, Motive e Geotab (telemetria/LiveOps), Uber (mapas vivos) e Tesla (software-centric) — a adaptação brasileira desse modelo, com foco no Norte/Nordeste.': 'Inspired by Samsara, Motive and Geotab (telemetry/LiveOps), Uber (live maps) and Tesla (software-centric) — a Brazilian adaptation focused on the North and Northeast.',
+  '// EM PRODUÇÃO': '// IN PRODUCTION',
+  'Stack Atual — MVP Operacional': 'Current Stack — Operational MVP',
+  'Mapas': 'Maps',
+  'IA/ML': 'AI/ML',
+  'Stack de Escala': 'Scale Stack',
+  'Machine Learning operacional + IA preditiva': 'Operational machine learning + predictive AI',
+  'PostGIS para roteamento 3D + no-fly zones': 'PostGIS for 3D routing + no-fly zones',
+  'Edge computing + dispositivos IoT embarcados': 'Edge computing + embedded IoT devices',
+  'Modo offline-first · Compressão inteligente de dados · Roteamento regional adaptativo': 'Offline-first mode · Intelligent data compression · Adaptive regional routing',
+  'Projetado para regiões com conectividade limitada — onde o Brasil mais precisa.': 'Designed for regions with limited connectivity — where Brazil needs it most.',
+  'Sete fases. Uma infraestrutura.': 'Seven phases. One infrastructure.',
+  'Fase 1': 'Phase 1', 'Fase 2': 'Phase 2', 'Fase 3': 'Phase 3', 'Fase 4': 'Phase 4',
+  'Fase 5': 'Phase 5', 'Fase 6': 'Phase 6', 'Fase 7': 'Phase 7', 'atual': 'current',
+  'Incubação e Estruturação': 'Incubation and Structuring',
+  'Landing page, dashboard, login, rastreamento básico, formalização.': 'Landing page, dashboard, login, basic tracking and company structuring.',
+  'MVP Operacional': 'Operational MVP',
+  'Mapa dinâmico, replay de rotas, notificações, painel SaaS, primeiros clientes.': 'Dynamic map, route replay, notifications, SaaS dashboard and first customers.',
+  'Telemetria Inteligente + LiveOps': 'Intelligent Telemetry + LiveOps',
+  'Score comportamental, alertas inteligentes, heatmaps, analytics inicial.': 'Behavior scores, intelligent alerts, heatmaps and initial analytics.',
+  'Analytics e Escalabilidade': 'Analytics and Scalability',
+  'APIs públicas, microsserviços, Kafka, Grafana, crescimento nacional.': 'Public APIs, microservices, Kafka, Grafana and nationwide growth.',
+  'IA Operacional': 'Operational AI',
+  'Previsão de acidentes, roteamento inteligente, ML aplicado.': 'Accident prediction, intelligent routing and applied ML.',
+  'Integração Multimodal': 'Multimodal Integration',
+  'Motos, vans, caminhões, embarcações.': 'Motorcycles, vans, trucks and vessels.',
+  'Drone Express + Hubs Autônomos': 'Drone Express + Autonomous Hubs',
+  'Logística híbrida, operações autônomas, infraestrutura inteligente.': 'Hybrid logistics, autonomous operations and intelligent infrastructure.',
+  'Objetivo 2026–2027': '2026–2027 Goal',
+  'Validar operação': 'Validate the operation',
+  'Conquistar primeiros contratos': 'Secure the first contracts',
+  'Criar diferencial regional': 'Build a regional advantage',
+  'Construir telemetria inteligente': 'Build intelligent telemetry',
+  'Preparar infraestrutura para futuras integrações avançadas': 'Prepare infrastructure for future advanced integrations',
+  '// A missão': '// The mission',
+  'Singapura é o mercado certo para o próximo passo.': 'Singapore is the right market for the next step.',
+  'Hub de LogTech asiático': 'Asian LogTech Hub',
+  'Singapura concentra operadores logísticos globais, regulação favorável para mobility tech e acesso direto a mercados do Sudeste Asiático, onde o gap de digitalização logística é semelhante ao brasileiro.': 'Singapore brings together global logistics operators, mobility-tech-friendly regulation and direct access to Southeast Asian markets, where the logistics digitization gap resembles Brazil\'s.',
+  'Demanda real por LogTech': 'Real demand for LogTech',
+  'Alta densidade urbana, volume logístico intenso e cultura de adoção tecnológica criam tração imediata para a proposta da LogUp Mob. Int.': 'High urban density, intense logistics volume and a strong technology adoption culture create immediate traction for LogUp Mob. Int.',
+  'Acesso ao capital asiático': 'Access to Asian capital',
+  'Inserção direta no ecossistema de VCs e aceleradoras focados em Urban Tech, Supply Chain Intelligence e Sustainability.': 'Direct access to VCs and accelerators focused on Urban Tech, Supply Chain Intelligence and Sustainability.',
+  '// Equipe': '// Team',
+  'Cinco fundadores. Dois cursos. Uma visão.': 'Five founders. Two disciplines. One vision.',
+  'Startup originada na UEMA — onde engenharia e administração se encontraram para construir a próxima geração da mobilidade logística brasileira.': 'A startup born at UEMA — where engineering and business came together to build the next generation of Brazilian logistics mobility.',
+  'A LogUp Mob. Int. está pronta para Singapura.': 'LogUp Mob. Int. is ready for Singapore.',
+  '5ª Missão de Startups Brasileiras — candidatura até 12 de junho de 2026.': '5th Brazilian Startup Mission — applications open until June 12, 2026.',
+  'Organização: Embaixada do Brasil em Singapura + SEBRAE.': 'Organized by: Embassy of Brazil in Singapore + SEBRAE.',
+  'Entrar em Contato': 'Get in Touch',
+  'UEMA — São Luís, Maranhão, Brasil': 'UEMA — São Luís, Maranhão, Brazil',
+  'Candidata à 5ª Missão SEBRAE de Startups em Singapura · "A inteligência que move as operações."': 'Candidate for the 5th SEBRAE Startup Mission in Singapore · "The intelligence that moves operations."',
+  'EM VOO': 'IN FLIGHT', 'ENTREGA': 'DELIVERY', 'agora mesmo': 'just now',
+  '⚠ FRENAGEM BRUSCA': '⚠ HARSH BRAKING', '🚨 EXCESSO DE VELOCIDADE': '🚨 SPEEDING',
+  '⌖ ROTA DESVIADA': '⌖ ROUTE DEVIATION', '✈ DRONE EM VOO': '✈ DRONE IN FLIGHT',
+  '✓ ENTREGA CONFIRMADA': '✓ DELIVERY CONFIRMED', '◔ SINAL FRACO': '◔ WEAK SIGNAL',
+  'MAPA TEMPORARIAMENTE INDISPONÍVEL': 'MAP TEMPORARILY UNAVAILABLE',
+  'Pedido': 'Order', 'ajuste preventivo': 'preventive adjustment', 'corredor aéreo livre': 'air corridor clear',
+  '2 de 4 barras': '2 of 4 bars', 'evento analisado': 'event analyzed', 'conexão instável': 'unstable connection'
+};
+
+const originalTextNodes = new WeakMap();
+const originalAttributes = new WeakMap();
+let currentLanguage = (() => {
+  try { return localStorage.getItem('logup-language') === 'en' ? 'en' : 'pt'; }
+  catch { return 'pt'; }
+})();
+
+const EN_INLINE_REPLACEMENTS = [
+  ['Pedido', 'Order'],
+  ['ajuste preventivo', 'preventive adjustment'],
+  ['corredor aéreo livre', 'air corridor clear'],
+  ['2 de 4 barras', '2 of 4 bars'],
+  ['evento analisado', 'event analyzed'],
+  ['conexão instável', 'unstable connection']
+];
+
+const translateValue = value => {
+  if (currentLanguage !== 'en') return value;
+  if (EN_TRANSLATIONS[value]) return EN_TRANSLATIONS[value];
+  return EN_INLINE_REPLACEMENTS.reduce(
+    (translated, [source, target]) => translated.replace(source, target),
+    value
+  );
+};
+
+const translateTree = (root = document.body) => {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement?.closest('script, style')) continue;
+    const visibleText = node.nodeValue.trim();
+    if (!visibleText) continue;
+    if (!originalTextNodes.has(node)) originalTextNodes.set(node, visibleText);
+    const source = originalTextNodes.get(node);
+    node.nodeValue = node.nodeValue.replace(visibleText, translateValue(source));
+  }
+
+  const elements = root.querySelectorAll ? root.querySelectorAll('[aria-label], [title]') : [];
+  elements.forEach(element => {
+    if (!originalAttributes.has(element)) {
+      originalAttributes.set(element, {
+        ariaLabel: element.getAttribute('aria-label'),
+        title: element.getAttribute('title')
+      });
+    }
+    const source = originalAttributes.get(element);
+    if (source.ariaLabel) element.setAttribute('aria-label', translateValue(source.ariaLabel));
+    if (source.title) element.setAttribute('title', translateValue(source.title));
+  });
+};
+
+const updateLanguageControls = () => {
+  document.querySelectorAll('[data-lang]').forEach(button => {
+    const active = button.dataset.lang === currentLanguage;
+    button.classList.toggle('active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
+};
+
+const applyLanguage = language => {
+  currentLanguage = language === 'en' ? 'en' : 'pt';
+  document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'pt-BR';
+  document.title = currentLanguage === 'en'
+    ? 'LogUp Mobility Intelligence — Intelligence that moves operations'
+    : 'LogUp Mobility Intelligence — A inteligência que move as operações';
+  const description = document.querySelector('meta[name="description"]');
+  if (description) description.content = currentLanguage === 'en'
+    ? 'LogUp Mobility Intelligence turns fleet data into real-time decisions through intelligent telemetry, live maps and risk prevention.'
+    : 'A LogUp Mob. Int. transforma dados de frota em decisões em tempo real — telemetria inteligente, mapas vivos e prevenção de riscos para transportadoras brasileiras. Startup originada na UEMA, candidata à 5ª Missão de Startups Brasileiras em Singapura.';
+  translateTree(document.body);
+  updateLanguageControls();
+  const menuButton = document.getElementById('navToggle');
+  if (menuButton) {
+    const open = menuButton.getAttribute('aria-expanded') === 'true';
+    menuButton.setAttribute('aria-label', translateValue(open ? 'Fechar menu de navegação' : 'Abrir menu de navegação'));
+  }
+  try { localStorage.setItem('logup-language', currentLanguage); } catch {}
+};
+
+document.querySelectorAll('[data-lang]').forEach(button => {
+  button.addEventListener('click', () => applyLanguage(button.dataset.lang));
+});
+applyLanguage(currentLanguage);
+
 // Header: transparente → sólido após 60px de scroll
 const header = document.getElementById('siteHeader');
 const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 60);
@@ -1778,7 +2084,7 @@ const mainNav = document.getElementById('mainNav');
 navToggle.addEventListener('click', () => {
   const open = mainNav.classList.toggle('open');
   navToggle.setAttribute('aria-expanded', String(open));
-  navToggle.setAttribute('aria-label', open ? 'Fechar menu de navegação' : 'Abrir menu de navegação');
+  navToggle.setAttribute('aria-label', translateValue(open ? 'Fechar menu de navegação' : 'Abrir menu de navegação'));
 });
 mainNav.querySelectorAll('a').forEach(link =>
   link.addEventListener('click', () => {
@@ -1873,6 +2179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <span class="chip-speed">EM VOO</span>
         <span class="chip-signal">${signalDots(4)}</span>
       </div>`;
+    translateTree(telemetryBar);
   };
 
   const updateTelemetry = () => {
@@ -1885,6 +2192,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     const droneChip = document.getElementById(`chip-${drone.id}`);
     if (droneChip) droneChip.querySelector('.chip-speed').textContent = Date.now() < drone.pauseUntil ? 'ENTREGA' : 'EM VOO';
+    translateTree(telemetryBar);
   };
 
   const alertTypes = {
@@ -1917,6 +2225,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div class="alert-vehicle">${vehicleId}</div>
       <div class="alert-location">${location}</div>`;
+    translateTree(card);
     alertsList.prepend(card);
     requestAnimationFrame(() => card.classList.add('visible'));
     if (alertsList.children.length > 4) removeAlert(alertsList.lastElementChild);
@@ -1943,6 +2252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (typeof maplibregl === 'undefined') {
     mapContainer.innerHTML = '<div class="map-status">MAPA TEMPORARIAMENTE INDISPONÍVEL</div>';
+    translateTree(mapContainer);
     return;
   }
 
